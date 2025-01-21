@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -39,7 +39,15 @@ async function run() {
         res.send(movies);
     }
     )
-    
+
+    //get 6 movies for feature by top ratings
+    app.get('/getfeaturemovies', async (req, res) => {
+        const cursor = moviesCollection.find({}).sort({rating:-1}).limit(6);
+        const movies = await cursor.toArray();
+        res.send(movies);
+    }
+    )
+
 
     app.post('/user/addmovies', async (req, res) => {
         const movie = req.body;
