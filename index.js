@@ -33,6 +33,7 @@ async function run() {
 
     const database = client.db("movieDB");
     const moviesCollection = database.collection("movies");
+    const favoriteCollection = database.collection("favorite");
 
     app.get('/allmovies', async (req, res) => {
         const cursor = moviesCollection.find({});
@@ -49,6 +50,28 @@ async function run() {
         res.send(movie);
     })
 
+    //add movie to favorite, will receive movie id and user email
+    app.post('/addtofavorite', async (req, res) => {
+        const favorite = req.body;
+        const result = await favoriteCollection.insertOne(favorite);
+        res.send(result);
+    })
+
+    //get all favorite movies by user email
+    app.get('/getfavorite/:email', async (req, res) => {
+        const email = req.params.email;
+        const query = {userEmail: email};
+        const cursor = favoriteCollection.find(query);
+        const favorite = await cursor.toArray();
+        //form the movieId it will find all the movies form movies collection
+        const movieIds = favorite.map(fav => new ObjectId(fav.movieId));
+        // console.log('movieIds', movieIds);
+        const movies = await moviesCollection.find({_id: {$in: movieIds}}).toArray();
+        // console.log('movies', movies);
+        res.send(movies);
+        
+    })
+
     //get 6 movies for feature by top ratings
     app.get('/getfeaturemovies', async (req, res) => {
         const cursor = moviesCollection.find({}).sort({rating:-1}).limit(6);
@@ -57,6 +80,14 @@ async function run() {
     }
     )
 
+    //delete movie
+    app.delete('/movies/:id', async (req, res) => {
+        console.log('delete hit');
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await moviesCollection.deleteOne(query);
+        res.send(result);
+    })
 
     app.post('/user/addmovies', async (req, res) => {
         const movie = req.body;
