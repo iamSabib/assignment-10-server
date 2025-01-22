@@ -72,6 +72,17 @@ async function run() {
         
     })
 
+    //delete movie from favorite for a user
+    app.delete('/deletefavorite/:email/:movieId', async (req, res) => {
+        const email = req.params.email; 
+        const movieId = req.params.movieId; 
+        console.log(email, movieId);
+        const query = { userEmail: email, movieId: movieId }; 
+        const result = await favoriteCollection.deleteOne(query);
+        console.log('delete result', result);
+        res.send(result);
+    });
+
     //get 6 movies for feature by top ratings
     app.get('/getfeaturemovies', async (req, res) => {
         const cursor = moviesCollection.find({}).sort({rating:-1}).limit(6);
