@@ -50,6 +50,25 @@ async function run() {
         res.send(movie);
     })
 
+    //search movie and get the all the matched movies
+    app.get('/searchmovies/:search', async (req, res) => {
+        const search = req.params.search;
+        const query = {title: {$regex: search, $options: 'i'}};
+        const cursor = moviesCollection.find(query);
+        const movies = await cursor.toArray();
+        res.send(movies);
+    })
+
+    //update movie by id
+    app.put('/updatemovies/:id', async (req, res) => {
+        const id = req.params.id;
+        const updatedMovie = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = { $set: updatedMovie }
+        const result = await moviesCollection.updateOne(filter, updateDoc);
+        res.json(result);
+    })
+
     //add movie to favorite, will receive movie id and user email
     app.post('/addtofavorite', async (req, res) => {
         const favorite = req.body;
