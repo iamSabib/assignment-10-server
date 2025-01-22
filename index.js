@@ -40,6 +40,14 @@ async function run() {
     }
     )
 
+    //get a movie by id
+    app.get('/movies/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const movie =  await moviesCollection.findOne(query);
+        res.send(movie);
+    })
+
     //get 6 movies for feature by top ratings
     app.get('/getfeaturemovies', async (req, res) => {
         const cursor = moviesCollection.find({}).sort({rating:-1}).limit(6);
